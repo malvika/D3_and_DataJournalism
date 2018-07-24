@@ -1,10 +1,10 @@
 // Set up our chart
-var svgWidth = 950;
-var svgHeight = 750;
+var svgWidth = window.innerWidth;
+var svgHeight = window.innerHeight;
 
 var margin = {
-	top:60,
-	right:40,
+	top: 60,
+	right: 40,
 	bottom: 100,
 	left: 100
 };
@@ -14,15 +14,17 @@ var chartHeight = svgHeight - margin.top - margin.bottom;
 
 // Create an SVG wrapper, append an SVG group that will hold our chart,
 //and shift the latter by left and top margins.
-
-var svg = d3.select('.chart')
+var svg = d3
+	.select('.chart')
 	.append("svg")
 	.attr("width", svgWidth)
 	.attr("height", svgHeight)
 	.append("g")
-	.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-var chart = svg.append("g");
+
+  // Append group element
+  var chart = svg.append("g")
+	.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 d3.select("body")
 	.append("div")
@@ -30,35 +32,33 @@ d3.select("body")
 	.style("opacity", 1)
 	
   // Import data from the data.csv file, call the function healthData
-	
-  d3.csv("data.csv", function(error, healthData){
+  d3.csv("data.csv", function(error, healthData) {
 	if (error) throw error;
 
-// // Create a function to parse date and time
-// var parseTime = d3.timeParse("%d-%b");
 
-  // Format the data
-  healthData.forEach(function(data){
-	data.poverty = +data.poverty;
-	data.healthStatus = +data.healthStatus;
-});
+   // Parse data
+  healthData.forEach(function(data) {
+	  data.poverty = +data.poverty;
+	  data.healthStatus = +data.healthStatus;
+  });
 
 	// Create the scales for the chart
-	var xLinearScale = d3.scaleLinear().range([0, chartWidth]);
-	var yLinearScale = d3.scaleLinear().range([chartHeight, 0]);
+	var x = d3.scaleLinear().range([0, chartWidth]);
+	var y = d3.scaleLinear().range([chartHeight, 0]);
 
-	var bottomAxis = d3.axisBottom(xLinearScale);
-	var leftAxis = d3.axisLeft(yLinearScale);
+	var bottomAxis = d3.axisBottom(x);
+	var leftAxis = d3.axisLeft(y);
 
-	//Set up the y-axis domain
-	xLinearScale.domain([0,d3.max(healthData, function(data){
+	//  Scale the range of the data
+	x.domain([0,d3.max(healthData, function(data){
 		return +data.poverty;
 	})]);
 
-	yLinearScale.domain([0,d3.max(healthData, function(data){
+	y.domain([0,d3.max(healthData, function(data){
 		return +data.healthStatus;
 	})]);
 
+	// Defining tooltip
 	var toolTip = d3.tip()
 		.attr("class", "toolTip")
 		.offset([80,-60])
@@ -71,16 +71,17 @@ d3.select("body")
 
 	chart.call(toolTip);
 
+  // Defining the circles on the chart 
 	chart.selectAll("circle")
 		.data(healthData)
 		.enter().append("circle")
 			.attr("cx", function(data, index){
 				console.log(data.poverty);
-				return xLinearScale(data.poverty);
+				return x(data.poverty);
 			})
 			.attr("cy", function(data, index){
 				console.log(data.healthStatus);
-				return yLinearScale(data.healthStatus);
+				return y(data.healthStatus);
 			})
 			.attr('r', "10")
 			.attr("fill", "blue")
@@ -88,23 +89,30 @@ d3.select("body")
 			.on("click", function(data){
 				toolTip.show(data);
 			});
-		chart.append("g")
-			.attr("transform", `translate(0, %{chartHeight})`)
-			.call(bottomAxis);
 
+	// Add the x-axis
+	chart.append("g")
+		.attr("transform", `translate(0, ${chartHeight})`)
+		.call(bottomAxis);
+	
+	// Add the y-axis
 	chart.append('g')
 		.call(leftAxis);
 
+    // Text for the y-axis
 	chart.append("text")
 		.attr("transform", "rotate(-90)")
 		.attr("y", 0 - margin.left + 40)
 		.attr("x", 0 - (chartHeight))
 		.attr("dy", "1em")
 		.attr("class", "axisText")
-		.text("Percentage of the Population in Fair or Poor Health")
+		.style("text-anchor", "top")
+		.text("Population in Fair or Poor Health (%)")
 
+   // Text for the x-axis
 	chart.append("text")
-		.attr("transform", "translate(" + (chartWidth/3) + ", " + (chartHeight + margin.top +30) + ")")
+		.attr("transform", "translate(" + (chartWidth/2) + ", " + (chartHeight + margin.top + 20) + ")")
 		.attr("class", "axisText")
-		.text("Percentage of the Population Below the Poverty Line");
+		.style("text-anchor", "middle")
+		.text("Population Below the Poverty Line (%)");
 })
