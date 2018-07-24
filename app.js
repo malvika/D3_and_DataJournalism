@@ -64,7 +64,7 @@ var svg = d3
 			var state = data.state;
 			var povertyRate = +data.poverty;
 			var healthStatus = +data.healthStatus;
-			return(state + "<br> Poverty Rate (%): " + povertyRate + "<br> Health Condition (%): " + healthStatus)
+			return(state + "<br> Poverty Rate (%): " + povertyRate + "<br> Health Rate (%): " + healthStatus)
 		});
 
 	chart.call(toolTip);
@@ -115,8 +115,8 @@ var svg = d3
 		.text("Population Below the Poverty Line (%)");
 
 // Text for title
-chart.append("text")
-	.style("text-anchor", "right")
-	.attr("class", "axisText")
-	.text("Correlation of Health vs. Poverty in USA");
+ 	chart.append("text")
+		.style("text-anchor", "right")
+		.attr("class", "axisText")
+		.text("Correlation of Health vs. Poverty in USA");
 })
